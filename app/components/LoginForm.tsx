@@ -23,7 +23,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             if (response.ok) {
                 console.log('Login successful');
                 const sessionStatus = await checkSession();
-                if (sessionStatus) {
+                if (sessionStatus.loggedIn) {
                     router.push('/user-profile');
                 } else {
                     console.log('Session not logged in');
