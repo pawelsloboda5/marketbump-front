@@ -23,6 +23,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             if (response.ok) {
                 console.log('Login successful');
                 checkSession();
+                // Redirect to user profile page marketbump-frontend\app\user-profile\page.tsx
                 router.push('/user-profile'); // Make sure this path matches your actual user profile page pathh
             } else {
                 console.log('Login failed');

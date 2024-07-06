@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Article from './Article';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
-const BASE_URL = 'https://radiant-forest-50474-0ef5e988210b.herokuapp.com';
+
+
 interface ArticleProps {
     _id: string;
     title: string;
@@ -21,7 +22,8 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
     const [favoritedArticles, setFavoritedArticles] = useState<string[]>([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
-
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+    
     const fetchMoreArticles = useCallback(async () => {
         try {
             const response = await fetch(`${BASE_URL}/api/newsfeeds/${userId}?page=${page + 1}&per_page=10`, {
