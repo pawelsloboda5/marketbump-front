@@ -22,9 +22,12 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
 
             if (response.ok) {
                 console.log('Login successful');
-                checkSession();
-                // Redirect to user profile page marketbump-frontend\app\user-profile\page.tsx
-                
+                const sessionStatus = checkSession();
+                if (sessionStatus.loggedIn) {
+                    router.push('/user-profile');
+                }else{
+                    console.log('Session not logged in');
+                }
             } else {
                 console.log('Login failed');
             }
@@ -39,6 +42,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
         });
         const data = await response.json();
         console.log('Session status:', data);
+        return data;
     };
 
     return (
