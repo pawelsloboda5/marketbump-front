@@ -1,10 +1,20 @@
 {
+    "version": 2,
+    "builds": [
+      {
+        "src": "app/**/*.tsx",
+        "use": "@vercel/next"
+      },
+      {
+        "src": "public/**/*",
+        "use": "@vercel/static"
+      }
+    ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/_next/static/$1"
+        "dest": "/app/$1"
       }
-    ],
-    "outputDirectory": ".next"
+    ]
   }
   
