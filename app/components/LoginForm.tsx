@@ -23,7 +23,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             if (response.ok) {
                 console.log('Login successful');
                 checkSession();
-                router.push('/user-profile'); // Make sure this path matches your actual user profile page path
+                router.push('/user-profile'); // Make sure this path matches your actual user profile page pathh
             } else {
                 console.log('Login failed');
             }
