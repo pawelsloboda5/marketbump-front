@@ -23,10 +23,11 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-    
+
     const fetchMoreArticles = useCallback(async () => {
         try {
             const response = await fetch(`${BASE_URL}/api/newsfeeds/${userId}?page=${page + 1}&per_page=10`, {
+                method: 'GET',
                 credentials: 'include',
             });
             const data = await response.json();
