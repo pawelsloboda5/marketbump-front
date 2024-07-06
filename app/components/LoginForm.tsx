@@ -21,28 +21,20 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             });
 
             if (response.ok) {
-                console.log('Login successful');
-                const sessionStatus = await checkSession();
-                if (sessionStatus.loggedIn) {
+                const data = await response.json();
+                if (data.msg === "Login successful") {
+                    // Redirect to profile page
                     router.push('/user-profile');
                 } else {
-                    console.log('Session not logged in');
+                    setError('Login failed. Please check your credentials.');
                 }
             } else {
-                console.log('Login failed');
+                setError('Login failed. Please check your credentials.');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error logging in:', error);
+            setError('An error occurred. Please try again.');
         }
-    };
-
-    const checkSession = async () => {
-        const response = await fetch(`${BASE_URL}/api/users/status`, {
-            credentials: 'include',
-        });
-        const data = await response.json();
-        console.log('Session status:', data);
-        return data;
     };
 
     return (
@@ -84,3 +76,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
 };
 
 export default LoginForm;
+function setError(arg0: string) {
+    throw new Error('Function not implemented.');
+}
+
