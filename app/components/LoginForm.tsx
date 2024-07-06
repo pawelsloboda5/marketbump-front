@@ -42,7 +42,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
         });
         const data = await response.json();
         console.log('Session status:', data);
-        return data.loggedIn;
+        return data;
     };
 
     return (
