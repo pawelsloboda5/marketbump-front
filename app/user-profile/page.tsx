@@ -5,8 +5,10 @@ import UserProfile from '../components/UserProfile';
 
 const UserProfilePage = () => {
     const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -26,14 +28,20 @@ const UserProfilePage = () => {
             } catch (error) {
                 console.error('Error fetching user data:', error);
                 router.push('/login'); // Redirect to login if an error occurs
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchUser();
     }, [router, BASE_URL]);
 
-    if (!user) {
+    if (loading) {
         return <div>Loading...</div>;
+    }
+
+    if (!user) {
+        return <div>Error loading user data.</div>;
     }
 
     return (
