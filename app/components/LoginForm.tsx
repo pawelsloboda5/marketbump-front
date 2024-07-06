@@ -23,7 +23,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             if (response.ok) {
                 console.log('Login successful');
                 const sessionStatus = await checkSession();
-                if (sessionStatus.loggedIn) {
+                if (sessionStatus) {
                     router.push('/user-profile');
                 } else {
                     console.log('Session not logged in');
@@ -42,7 +42,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
         });
         const data = await response.json();
         console.log('Session status:', data);
-        return data;
+        return data.loggedIn;
     };
 
     return (
