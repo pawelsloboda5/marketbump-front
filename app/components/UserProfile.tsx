@@ -18,33 +18,23 @@ interface Article {
 
 const UserProfile: React.FC<UserProfileProps> = ({ user }) => {
     const [activeTab, setActiveTab] = useState('posts');
-    const [userData, setUserData] = useState(user);
     const [favoritedArticles, setFavoritedArticles] = useState<Article[]>([]);
-    const [userId, setUserId] = useState<string | null>(null);
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-    // Fetch user session and favorited articles
-    useEffect(() => {
-        const fetchUserSession = async () => {
-            const response = await fetch(`${BASE_URL}/api/users/status`, {
-                credentials: 'include',
-            });
-            const data = await response.json();
-            if (data.loggedIn) {
-                setUserId(data.user_id);
-                fetchFavoritedArticles(data.user_id);
-            }
-        };
 
+    // Fetch favorited articles when the component mounts
+    useEffect(() => {
         const fetchFavoritedArticles = async (userId: string) => {
-            const response = await fetch(`${BASE_URL}/api/users/${userId}/favorites`, {
+            const response = await fetch(`${BASE_URL}/api/users/${userId}/favorited_articles`, {
                 credentials: 'include',
             });
             const data = await response.json();
             setFavoritedArticles(data);
         };
 
-        fetchUserSession();
-    }, [user,BASE_URL]);
+        if (user) {
+            fetchFavoritedArticles(user.username);
+        }
+    }, [user, BASE_URL]);
 
     const handleTabClick = (tab: string) => {
         setActiveTab(tab);
