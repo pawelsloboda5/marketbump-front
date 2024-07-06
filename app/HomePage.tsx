@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import UserProfile from './components/UserProfile';
 import NewsFeed from './components/NewsFeed';
 
@@ -8,6 +9,8 @@ const HomePage = () => {
   const [newsfeed, setNewsFeed] = useState([]);
   const [userId, setUserId] = useState(null);
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  const router = useRouter();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,7 +35,7 @@ const HomePage = () => {
           const newsData = await newsRes.json();
           setNewsFeed(newsData.articles);
         } else {
-          // Handle not logged in state, redirect to login, etc.
+          router.push('/login');
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -40,7 +43,7 @@ const HomePage = () => {
     };
 
     fetchData();
-  }, [ BASE_URL]);
+  }, [BASE_URL, router]);
 
   if (!user) {
     return <p>Loading...</p>;
