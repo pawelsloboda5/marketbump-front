@@ -1,58 +1,68 @@
 "use client";
+
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import UserProfile from './components/UserProfile';
 import NewsFeed from './components/NewsFeed';
 
 const HomePage = () => {
-  const [user, setUser] = useState(null);
   const [newsfeed, setNewsFeed] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch user status to get user_id
         const sessionRes = await fetch(`${BASE_URL}/api/users/status`, {
           credentials: 'include',
         });
+
+        if (!sessionRes.ok) {
+          throw new Error(`HTTP error! status: ${sessionRes.status}`);
+        }
+
         const sessionData = await sessionRes.json();
 
         if (sessionData.loggedIn) {
           const userId = sessionData.user_id;
-          setUserId(userId);
 
-          const userRes = await fetch(`${BASE_URL}/api/users/${userId}`, {
+          // Fetch user-specific news feed
+          const newsRes = await fetch(`${BASE_URL}/api/newsfeeds/${userId}`, {
             credentials: 'include',
           });
-          const userData = await userRes.json();
-          setUser(userData);
 
-          const newsRes = await fetch(`${BASE_URL}/api/newsfeeds/${userId}?page=1&per_page=10`, {
-            credentials: 'include',
-          });
+          if (!newsRes.ok) {
+            throw new Error(`HTTP error! status: ${newsRes.status}`);
+          }
+
           const newsData = await newsRes.json();
-          setNewsFeed(newsData.articles);
+          setNewsFeed(newsData.articles || []);
         } else {
-          router.push('/login');
+          window.location.href = '/login';
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [BASE_URL, router]);
+  }, [BASE_URL]);
 
-  if (!user) {
+  if (loading) {
     return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
   }
 
   return (
     <div className="bg-transparent text-white min-h-screen flex flex-col items-center">
       <main className="w-full max-w-3xl p-4">
-        {newsfeed.length > 0 ? (
+        {Array.isArray(newsfeed) && newsfeed.length > 0 ? (
           <NewsFeed articles={newsfeed} />
         ) : (
           <p>No news available</p>

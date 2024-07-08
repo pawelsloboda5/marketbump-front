@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const router = useRouter();
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError('');
         try {
             const response = await fetch(`${BASE_URL}/api/users/login`, {
                 method: 'POST',
@@ -22,20 +24,17 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                if (data.msg === "Login successful") {
-                    // Redirect to profile page
-                    router.push('/user-profile');
-                } else {
-                    setError('Login failed. Please check your credentials.');
-                }
-            } else {
-                setError('Login failed. Please check your credentials.');
+                console.log('Login successful:', data);
+                router.push('/'); // Redirect to the home page
+              } else {
+                const errorData = await response.json();
+                setError(errorData.msg || 'Login failed');
+              }
+            } catch (error) {
+              console.error('Error logging in:', error);
+              setError('An error occurred. Please try again.');
             }
-        } catch (error) {
-            console.error('Error logging in:', error);
-            setError('An error occurred. Please try again.');
-        }
-    };
+          };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-transparent text-white">
