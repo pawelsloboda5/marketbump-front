@@ -49,7 +49,7 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
-                const response = await fetch(`${BASE_URL}/api/users/get_user_status`, {
+                const response = await fetch(`${BASE_URL}/api/users/status`, {
                     credentials: 'include',
                 });
                 const data = await response.json();

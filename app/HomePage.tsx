@@ -13,7 +13,7 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         // Fetch user status to get user_id
-        const sessionRes = await fetch(`${BASE_URL}/api/users/get_user_status`, {
+        const sessionRes = await fetch(`${BASE_URL}/api/users/status`, {
           credentials: 'include',
         });
 
