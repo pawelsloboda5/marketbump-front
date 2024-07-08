@@ -17,6 +17,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 credentials: 'include',
                 body: JSON.stringify({ email, password }),
