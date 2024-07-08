@@ -16,12 +16,15 @@ const RegisterForm = ({ onLoginClick }: { onLoginClick: () => void }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
+                credentials: 'include',
                 body: JSON.stringify({ username, email, password }),
             });
 
             if (response.ok) {
-                // Optionally, redirect the user or show a success message
+                const data = await response.json();
+                localStorage.setItem('auth_token', data.auth_token);
                 router.push('/create-portfolio');
             } else {
                 console.log('Registration failed');

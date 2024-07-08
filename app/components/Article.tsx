@@ -94,7 +94,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            body: JSON.stringify({ user_id: userId }),
+            body: JSON.stringify({ user_id: userId, article_id: article._id}),
         });
 
         if (response.ok) {
@@ -110,7 +110,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            body: JSON.stringify({ user_id: userId }),
+            body: JSON.stringify({ user_id: userId, article_id: article._id}),
         });
 
         if (response.ok) {
@@ -125,7 +125,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            body: JSON.stringify({ user_id: userId, quote: commentInput }),
+            body: JSON.stringify({ user_id: userId, quote: commentInput, article_id: article._id}),
         });
 
         if (response.ok) {
