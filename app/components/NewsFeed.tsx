@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Article from './Article';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
-
 interface ArticleProps {
     _id: string;
     title: string;
@@ -25,10 +24,15 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
     const fetchMoreArticles = useCallback(async () => {
+        if (!userId) return;
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
         try {
             const response = await fetch(`${BASE_URL}/api/newsfeeds/${userId}?page=${page + 1}&per_page=10`, {
                 method: 'GET',
-                credentials: 'include',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
             });
             const data = await response.json();
             if (data && data.articles) {
@@ -42,32 +46,39 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
             console.error('Error fetching more articles:', error);
             setHasMore(false);
         }
-    }, [page, userId]);
+    }, [page, userId, BASE_URL]);
 
     const { bottomRef, isFetching } = useInfiniteScroll(fetchMoreArticles);
 
     useEffect(() => {
         const fetchUserSession = async () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) return;
             try {
                 const response = await fetch(`${BASE_URL}/api/users/status`, {
-                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
                 const data = await response.json();
-                if (data.loggedIn) {
-                    setUserId(data.user_id);
-                    fetchLikedArticles(data.user_id);
-                    fetchFavoritedArticles(data.user_id);
-                    fetchInitialArticles(data.user_id);
+                if (data.user_id) {
+                    const userId = data.user_id;
+                    setUserId(userId);
+                    fetchLikedArticles(userId, token);
+                    fetchFavoritedArticles(userId, token);
+                    fetchInitialArticles(userId, token);
                 }
             } catch (error) {
                 console.error('Error fetching user session:', error);
             }
         };
 
-        const fetchLikedArticles = async (userId: string) => {
+        const fetchLikedArticles = async (userId: string, token: string) => {
             try {
                 const response = await fetch(`${BASE_URL}/api/users/${userId}/liked_articles`, {
-                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
                 const data = await response.json();
                 const likedArticleIds = data.map((article: any) => article._id);
@@ -77,10 +88,12 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
             }
         };
 
-        const fetchFavoritedArticles = async (userId: string) => {
+        const fetchFavoritedArticles = async (userId: string, token: string) => {
             try {
                 const response = await fetch(`${BASE_URL}/api/users/${userId}/favorited_articles`, {
-                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
                 const data = await response.json();
                 const favoritedArticleIds = data.map((article: any) => article._id);
@@ -90,10 +103,12 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
             }
         };
 
-        const fetchInitialArticles = async (userId: string) => {
+        const fetchInitialArticles = async (userId: string, token: string) => {
             try {
                 const response = await fetch(`${BASE_URL}/api/newsfeeds/${userId}?page=1&per_page=10`, {
-                    credentials: 'include',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                 });
                 const data = await response.json();
                 if (data && data.articles) {
@@ -108,7 +123,7 @@ export default function NewsFeed({ articles: initialArticles }: { articles: Arti
         };
 
         fetchUserSession();
-    }, []);
+    }, [BASE_URL]);
 
     if (!userId) {
         return <p>Loading...</p>;

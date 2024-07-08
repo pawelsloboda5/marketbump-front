@@ -25,6 +25,7 @@ const LoginForm = ({ onRegisterClick }: { onRegisterClick: () => void }) => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Login successful:', data);
+                localStorage.setItem('auth_token', data.auth_token);
                 router.push('/'); // Redirect to the home page
               } else {
                 const errorData = await response.json();

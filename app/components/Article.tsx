@@ -39,7 +39,9 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
 
     const fetchComments = useCallback(async () => {
         const response = await fetch(`${BASE_URL}/api/articles/${article._id}/comments`, {
-            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            },
         });
         const data = await response.json();
         setCommentedArticles(prevComments => ({ ...prevComments, [article._id]: data }));
@@ -47,7 +49,9 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
 
     const fetchLikeCount = useCallback(async () => {
         const response = await fetch(`${BASE_URL}/api/articles/${article._id}`, {
-            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            },
         });
         const data = await response.json();
         setLikeCount(data.likes_count);
@@ -63,8 +67,8 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            credentials: 'include',
             body: JSON.stringify({ user_id: userId }),
         });
 
@@ -79,8 +83,8 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            credentials: 'include',
             body: JSON.stringify({ user_id: userId }),
         });
 
@@ -94,8 +98,8 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
             },
-            credentials: 'include',
             body: JSON.stringify({ user_id: userId, quote: commentInput }),
         });
 
@@ -118,38 +122,66 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
     };
 
     return (
-        <div className="article-container">
-            <h2>{article.title}</h2>
+        <div className="bg-background-secondary p-4 rounded-lg">
+            <div className="flex items-center justify-between text-sm mb-2">
+                <span className="text-gray-600">{article.author}</span>
+                <span className="text-gray-400">{formatTime(article.published_utc)}</span>
+            </div>
+            <h2 className="text-xl font-bold">{article.title}</h2>
             <p>{article.description}</p>
-            <p>By {article.author}</p>
-            <p>Published on {new Date(article.published_utc).toLocaleString()}</p>
-            <div>
-                <button onClick={handleLike}>
-                    {likedArticles.includes(article._id) ? <LikesIconFilled /> : <LikeIcon />}
+            <a href={article.article_url} target="_blank" rel="noopener noreferrer" className="text-blue-500">
+                <ContinueIcon />
+            </a>
+            <div className="flex gap-1 mt-2">
+                <button
+                    className={`flex items-center px-2 py-1 rounded-xl ${likedArticles.includes(article._id) ? 'text-red-500' : 'text-gray-400 hover:bg-gray-800'}`}
+                    onClick={handleLike}
+                >
+                    <LikeIcon />
+                    <span className="ml-1">{likeCount}</span>  {/* Display like count */}
                 </button>
-                <button onClick={handleFavorite}>
+                <button
+                    className={`flex items-center px-2 py-1 rounded-xl ${showComments ? 'text-red-500' : 'text-gray-400 hover:bg-gray-800'}`}
+                    onClick={toggleComments}
+                >
+                    <CommentIcon />
+                    <span className="ml-1">{commentedArticles[article._id] ? commentedArticles[article._id].length : 0}</span>
+                </button>
+                <button
+                    className={`flex items-center px-2 py-1 rounded-xl ${favoritedArticles.includes(article._id) ? 'text-red-500' : 'text-gray-400 hover:bg-gray-800'}`}
+                    onClick={handleFavorite}
+                >
                     <FavoriteIcon />
                 </button>
-                <button onClick={toggleComments}>
-                    <CommentIcon />
-                </button>
-                <span>{likeCount} likes</span>
-                <span>{article.comments.length} comments</span>
             </div>
             {showComments && (
-                <div className="comments-section">
-                    {commentedArticles[article._id].map((comment, index) => (
-                        <div key={index}>
-                            <p>{comment.quote}</p>
-                        </div>
-                    ))}
+                <div className="mt-2">
                     <input
                         type="text"
                         value={commentInput}
                         onChange={(e) => setCommentInput(e.target.value)}
                         placeholder="Add a comment"
+                        className="w-full px-3 py-2 bg-gray-800 text-white border border-gray-600 rounded-md"
                     />
-                    <button onClick={handleComment}>Comment</button>
+                    <button
+                        onClick={handleComment}
+                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 mt-2"
+                    >
+                        Submit
+                    </button>
+                    <button
+                        onClick={toggleComments}
+                        className="w-full bg-gray-600 text-white py-2 rounded-md hover:bg-gray-700 mt-2"
+                    >
+                        Cancel
+                    </button>
+                    <div className="mt-2 space-y-2">
+                        {commentedArticles[article._id]?.map((comment, idx) => (
+                            <div key={idx} className="bg-gray-800 p-2 rounded-md">
+                                <strong>User {userDetails[comment.user_id] || comment.user_id}:</strong> {comment.quote}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>
