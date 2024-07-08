@@ -11,6 +11,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 interface Comment {
     user_id: string;
     quote: string;
+    username?: string; // Adding username to Comment interface
 }
 
 interface ArticleProps {
@@ -36,6 +37,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
     const [commentInput, setCommentInput] = useState('');
     const [showComments, setShowComments] = useState(false);
     const [likeCount, setLikeCount] = useState(article.likes.length);
+    const [userDetails, setUserDetails] = useState<{ [key: string]: string }>({});
 
     const fetchComments = useCallback(async () => {
         const response = await fetch(`${BASE_URL}/api/articles/${article._id}/comments`, {
@@ -45,7 +47,30 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
         });
         const data = await response.json();
         setCommentedArticles(prevComments => ({ ...prevComments, [article._id]: data }));
+
+        // Fetch user details for each comment
+        const userIds = data.map((comment: Comment) => comment.user_id);
+        await fetchUserDetails(userIds);
     }, [article._id]);
+
+    const fetchUserDetails = async (userIds: string[]) => {
+        const uniqueUserIds = Array.from(new Set(userIds));
+        const userDetailsPromises = uniqueUserIds.map(async (userId) => {
+            const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                },
+            });
+            const userData = await response.json();
+            return { userId, username: userData.username };
+        });
+        const userDetailsArray = await Promise.all(userDetailsPromises);
+        const userDetailsObject = userDetailsArray.reduce((acc, userDetail) => {
+            acc[userDetail.userId] = userDetail.username;
+            return acc;
+        }, {} as { [key: string]: string });
+        setUserDetails(prevUserDetails => ({ ...prevUserDetails, ...userDetailsObject }));
+    };
 
     const fetchLikeCount = useCallback(async () => {
         const response = await fetch(`${BASE_URL}/api/articles/${article._id}`, {
@@ -106,7 +131,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
         if (response.ok) {
             setCommentedArticles(prevComments => ({
                 ...prevComments,
-                [article._id]: [...(prevComments[article._id] || []), { user_id: userId, quote: commentInput }]
+                [article._id]: [...(prevComments[article._id] || []), { user_id: userId, quote: commentInput, username: userDetails[userId] }]
             }));
             setCommentInput('');
         }
@@ -178,7 +203,7 @@ const Article: React.FC<ArticleProps> = ({ article, userId, likedArticles, setLi
                     <div className="mt-2 space-y-2">
                         {commentedArticles[article._id]?.map((comment, idx) => (
                             <div key={idx} className="bg-gray-800 p-2 rounded-md">
-                                <strong>User {userDetails[comment.user_id] || comment.user_id}:</strong> {comment.quote}
+                                <strong>{userDetails[comment.user_id] || 'Unknown User'}:</strong> {comment.quote}
                             </div>
                         ))}
                     </div>
